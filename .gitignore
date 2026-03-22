@@ -1,0 +1,8 @@
+node_modules/
+client/node_modules/
+client/build/
+.env
+*.log
+.DS_Store
+server/public/images/uploads/*
+!server/public/images/uploads/.gitkeep
