@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import SportIcon, { getSportColor, getSportLabel } from './SportIcon';
-import { countdownLabel, formatDatePL } from '../utils';
+import { countdownLabel, formatDatePL, getDifficultyLabel } from '../utils';
 
 function EventCard({ event }) {
   const color = getSportColor(event.sport_type);
@@ -26,7 +26,7 @@ function EventCard({ event }) {
           {event.distance && <span>{event.distance}</span>}
         </div>
         {event.difficulty && (
-          <span className="difficulty-badge">{event.difficulty}</span>
+          <span className="difficulty-badge">{getDifficultyLabel(event.difficulty)}</span>
         )}
       </div>
       <div className="event-card-footer">

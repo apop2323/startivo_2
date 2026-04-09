@@ -575,6 +575,10 @@ img {
   border: 1px solid var(--cream-border);
   transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
 }
 
 .event-card:hover {
@@ -725,15 +729,8 @@ img {
 }
 
 /* ========================================
-   EVENT CARD (as <a> link)
+   EVENT CARD LINK ARROW
    ======================================== */
-.event-card {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  color: inherit;
-}
-
 .event-card-link {
   font-weight: 600;
   font-size: 14px;

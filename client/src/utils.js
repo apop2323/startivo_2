@@ -25,6 +25,17 @@ export function formatDateLongPL(dateStr) {
   });
 }
 
+const DIFFICULTY_LABELS = {
+  easy: 'Łatwy',
+  medium: 'Średni',
+  hard: 'Trudny',
+  extreme: 'Ekstremalny',
+};
+
+export function getDifficultyLabel(value) {
+  return DIFFICULTY_LABELS[value] || value;
+}
+
 export function toggleSavedEvent(id, storageKey) {
   const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
   const idx = saved.indexOf(id);

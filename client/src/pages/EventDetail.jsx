@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
-import { formatDateLongPL, formatDatePL, toggleSavedEvent, isEventSaved } from '../utils';
+import { formatDateLongPL, formatDatePL, toggleSavedEvent, isEventSaved, getDifficultyLabel } from '../utils';
 import { MY_EVENTS_STORAGE_KEY } from '../constants';
 
 function EventDetail() {
@@ -118,7 +118,7 @@ function EventDetail() {
             </span>
             {event.difficulty && (
               <span className="event-detail-tag" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
-                {event.difficulty}
+                {getDifficultyLabel(event.difficulty)}
               </span>
             )}
             {event.featured && (
