@@ -16,7 +16,7 @@ const SPORT_LABELS = {
   hyrox:     'Hyrox',
   triathlon: 'Triathlon',
   cycling:   'Kolarstwo',
-  trail:     'Trail',
+  trail:     'Trail Running',
   other:     'Inne'
 };
 

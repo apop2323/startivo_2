@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
 import { SPORTS } from '../constants';
+import { formatDatePL } from '../utils';
 
 const CITY_COORDS = {
   'Warszawa': [52.2297, 21.0122], 'Kraków': [50.0647, 19.9450], 'Wrocław': [51.1079, 17.0385],
@@ -114,7 +115,7 @@ function Mapa() {
         <div style="font-family: Inter, sans-serif; min-width: 200px; padding: 4px;">
           <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">${ev.name}</div>
           <div style="color: #666; font-size: 13px; margin-bottom: 4px;">${ev.city}, ${ev.voivodeship}</div>
-          <div style="color: #999; font-size: 12px; margin-bottom: 8px;">${new Date(ev.date_start).toLocaleDateString('pl-PL')}</div>
+          <div style="color: #999; font-size: 12px; margin-bottom: 8px;">${formatDatePL(ev.date_start)}</div>
           <div style="font-weight: 700; color: ${color}; font-size: 14px; margin-bottom: 8px;">${ev.price ? ev.price + ' z\u0142' : 'Bezp\u0142atne'}</div>
           <a href="/event/${ev.slug}" style="color: #FF5C00; font-weight: 600; font-size: 13px;">Zobacz szczeg\u00f3\u0142y \u2192</a>
         </div>
@@ -173,7 +174,7 @@ function Mapa() {
               </span>
               <h3 style={{ fontSize: 16, marginTop: 10, marginBottom: 6 }}>{selected.name}</h3>
               <p style={{ color: 'var(--gray)', fontSize: 13, marginBottom: 12 }}>
-                {selected.city} · {new Date(selected.date_start).toLocaleDateString('pl-PL')}
+                {selected.city} · {formatDatePL(selected.date_start)}
               </p>
               <button
                 className="btn-primary"

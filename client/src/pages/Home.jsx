@@ -4,10 +4,8 @@ import { Helmet } from 'react-helmet-async';
 import { useReveal } from '../hooks/useReveal';
 import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
 import EventCard from '../components/EventCard';
-import { SPORTS, VOIVODESHIPS } from '../constants';
+import { SPORTS_MAIN, VOIVODESHIPS } from '../constants';
 import { countdownLabel, formatDatePL } from '../utils';
-
-const SPORTS_NO_OTHER = SPORTS.filter(s => s.type !== 'other');
 
 const PLACEHOLDER_EVENTS = [
   { id: 1, name: 'Runmageddon Warszawa', sport_type: 'ocr', city: 'Warszawa', date_start: '2026-05-16', price: 199, distance: '5km / 12km', slug: 'placeholder' },
@@ -139,7 +137,7 @@ function Home() {
               className={sportFilter ? 'has-value' : ''}
             >
               <option value="">Dyscyplina</option>
-              {SPORTS_NO_OTHER.map(s => <option key={s.type} value={s.type}>{s.label}</option>)}
+              {SPORTS_MAIN.map(s => <option key={s.type} value={s.type}>{s.label}</option>)}
             </select>
             <select
               value={voivFilter}
@@ -153,7 +151,7 @@ function Home() {
           </form>
 
           <div className="sport-tags">
-            {SPORTS_NO_OTHER.map(s => (
+            {SPORTS_MAIN.map(s => (
               <button
                 key={s.type}
                 className="sport-tag"
@@ -203,7 +201,7 @@ function Home() {
               </Link>
             </div>
             <div className="reveal d1 discipline-cards">
-              {SPORTS_NO_OTHER.map(s => {
+              {SPORTS_MAIN.map(s => {
                 const count = bySport[s.type] || 0;
                 const color = getSportColor(s.type);
                 return (

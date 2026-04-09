@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import SportIcon, { getSportColor } from '../components/SportIcon';
-import { formatDatePL } from '../utils';
+import { formatDatePL, toggleSavedEvent } from '../utils';
 import { MY_EVENTS_STORAGE_KEY } from '../constants';
 
 function MojeStarty() {
@@ -29,10 +29,9 @@ function MojeStarty() {
   }, []);
 
   const remove = (id) => {
-    const updated = saved.filter(s => s !== id);
+    const updated = toggleSavedEvent(id, MY_EVENTS_STORAGE_KEY);
     setSaved(updated);
     setEvents(ev => ev.filter(e => e.id !== id));
-    localStorage.setItem(MY_EVENTS_STORAGE_KEY, JSON.stringify(updated));
   };
 
   return (

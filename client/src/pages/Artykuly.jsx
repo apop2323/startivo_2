@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useReveal } from '../hooks/useReveal';
 import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
-import { SPORTS } from '../constants';
+import { SPORTS_MAIN } from '../constants';
 import { formatDatePL } from '../utils';
-
-const SPORTS_NO_OTHER = SPORTS.filter(s => s.type !== 'other');
 
 function Artykuly() {
   useReveal();
@@ -48,7 +46,7 @@ function Artykuly() {
             >
               Wszystkie
             </button>
-            {SPORTS_NO_OTHER.map(s => {
+            {SPORTS_MAIN.map(s => {
               const color = getSportColor(s.type);
               const active = filter === s.type;
               return (

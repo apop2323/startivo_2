@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import HexLogo from './HexLogo';
 import CheckIcon from './CheckIcon';
 import { getSportColor } from './SportIcon';
-import { SPORTS } from '../constants';
-
-const SPORTS_WITH_COLORS = SPORTS.filter(s => s.type !== 'other');
+import { SPORTS_MAIN } from '../constants';
 
 function Footer() {
   const [email, setEmail] = useState('');
@@ -123,7 +121,7 @@ function Footer() {
           <div>
             <p className="footer-col-title">Dyscypliny</p>
             <ul className="footer-col-links">
-              {SPORTS_WITH_COLORS.map(s => {
+              {SPORTS_MAIN.map(s => {
                 const color = getSportColor(s.type);
                 return (
                   <li key={s.type}>

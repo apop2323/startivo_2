@@ -12,6 +12,8 @@ export const SPORTS = [
 
 export const SPORT_TYPES = SPORTS.map(s => s.type);
 
+export const SPORTS_MAIN = SPORTS.filter(s => s.type !== 'other');
+
 export const VOIVODESHIPS = [
   'dolnośląskie', 'kujawsko-pomorskie', 'lubelskie', 'lubuskie', 'łódzkie',
   'małopolskie', 'mazowieckie', 'opolskie', 'podkarpackie', 'podlaskie',
