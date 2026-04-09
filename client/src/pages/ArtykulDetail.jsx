@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
+import { formatDatePL } from '../utils';
 
 function ArtykulDetail() {
   const { slug } = useParams();
@@ -20,13 +21,13 @@ function ArtykulDetail() {
   }, [slug]);
 
   if (loading) return (
-    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="center-content">
       <div className="loading-spinner" />
     </div>
   );
 
   if (!article) return (
-    <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 40 }}>
+    <div className="center-content">
       <h2>Artykuł nie znaleziony</h2>
       <button className="btn-primary" onClick={() => navigate('/artykuly')}>← Wróć do artykułów</button>
     </div>
@@ -61,10 +62,7 @@ function ArtykulDetail() {
         padding: '120px 0 60px',
       }}>
         <div className="container" style={{ maxWidth: 800 }}>
-          <button
-            onClick={() => navigate('/artykuly')}
-            style={{ color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 24, fontSize: 14 }}
-          >
+          <button className="back-btn" onClick={() => navigate('/artykuly')}>
             ← Wszystkie artykuły
           </button>
           <span className="sport-badge" style={{ background: `${color}22`, color, marginBottom: 16, display: 'inline-flex' }}>
@@ -77,7 +75,7 @@ function ArtykulDetail() {
           <div style={{ display: 'flex', gap: 16, marginTop: 24, color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
             <span>{article.author_name || 'Redakcja Startivo'}</span>
             <span>·</span>
-            <span>{new Date(article.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <span>{formatDatePL(article.created_at, { day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </div>
         </div>
       </div>

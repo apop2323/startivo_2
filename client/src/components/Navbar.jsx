@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-
-function HexLogo() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" fill="#FF5C00"/>
-      <path d="M11 16L14 11L17 16L14 21L11 16Z" fill="white"/>
-      <path d="M17 13L21 16L17 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>
-  );
-}
+import HexLogo from './HexLogo';
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -43,7 +34,7 @@ function Navbar() {
         <div className="container">
           <div className="navbar-inner">
             <Link to="/" className="navbar-logo" onClick={() => setMobileOpen(false)}>
-              <HexLogo />
+              <HexLogo size={32} />
               <span className="navbar-logo-text">Startivo</span>
             </Link>
 
