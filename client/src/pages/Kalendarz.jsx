@@ -1,72 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useReveal } from '../hooks/useReveal';
-import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
-
-const SPORTS = ['running','hyrox','ocr','triathlon','cycling','trail','other'];
-const VOIVODESHIPS = [
-  'dolnośląskie','kujawsko-pomorskie','lubelskie','lubuskie','łódzkie',
-  'małopolskie','mazowieckie','opolskie','podkarpackie','podlaskie',
-  'pomorskie','śląskie','świętokrzyskie','warmińsko-mazurskie','wielkopolskie','zachodniopomorskie'
-];
-const SPORT_LABELS = { running:'Bieganie', hyrox:'Hyrox', ocr:'OCR', triathlon:'Triathlon', cycling:'Kolarstwo', trail:'Trail', other:'Inne' };
-
-function countdownLabel(dateStr) {
-  const diff = Math.ceil((new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return 'Zakończone';
-  if (diff === 0) return 'Dziś!';
-  if (diff < 7) return `${diff} dni`;
-  return `${Math.ceil(diff/30)} mies.`;
-}
-
-function EventCard({ event }) {
-  const navigate = useNavigate();
-  const color = getSportColor(event.sport_type);
-  return (
-    <div
-      className="event-card"
-      onClick={() => navigate(`/event/${event.slug}`)}
-      style={{ display: 'flex', flexDirection: 'column' }}
-    >
-      <div
-        className="event-card-thumb"
-        style={{ background: `linear-gradient(135deg, ${color}33, ${color}11)` }}
-      >
-        <span className="sport-badge" style={{ background: `${color}22`, color }}>
-          <SportIcon type={event.sport_type} size={12} />
-          {getSportLabel(event.sport_type)}
-        </span>
-        <span className="countdown-badge">{countdownLabel(event.date_start)}</span>
-      </div>
-      <div className="event-card-body" style={{ flex: 1 }}>
-        <div className="event-card-name">{event.name}</div>
-        <div className="event-card-meta">
-          <span>{new Date(event.date_start).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-          <span>{event.city}</span>
-          {event.distance && <span>{event.distance}</span>}
-        </div>
-        {event.difficulty && (
-          <span style={{
-            fontSize: 11, padding: '2px 8px', borderRadius: 100,
-            background: 'var(--cream)', color: 'var(--gray)', fontWeight: 600,
-          }}>
-            {event.difficulty}
-          </span>
-        )}
-      </div>
-      <div className="event-card-footer">
-        <span className="event-price">{event.price ? `${event.price} zł` : 'Bezpłatne'}</span>
-        <button style={{ color, fontWeight: 600, fontSize: 13 }}>Zobacz →</button>
-      </div>
-    </div>
-  );
-}
+import SportIcon, { getSportColor } from '../components/SportIcon';
+import EventCard from '../components/EventCard';
+import { SPORTS, VOIVODESHIPS } from '../constants';
 
 function Kalendarz() {
   useReveal();
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [sportType, setSportType] = useState(searchParams.get('sport_type') || '');
@@ -106,6 +48,14 @@ function Kalendarz() {
     fetchEvents(1);
   };
 
+  const clearFilters = () => {
+    setSportType('');
+    setVoivodeship('');
+    setSearch('');
+    setDateFrom('');
+    setDateTo('');
+  };
+
   return (
     <>
       <Helmet>
@@ -116,7 +66,7 @@ function Kalendarz() {
       {/* Header */}
       <div className="page-header">
         <div className="container">
-          <p className="section-label" style={{ color: 'var(--orange)' }}>Kalendarz 2026</p>
+          <p className="section-label">Kalendarz 2026</p>
           <h1 style={{ color: 'white' }}>Wszystkie<br/>starty</h1>
         </div>
       </div>
@@ -140,7 +90,7 @@ function Kalendarz() {
               style={{ minWidth: 140 }}
             >
               <option value="">Wszystkie dyscypliny</option>
-              {SPORTS.map(s => <option key={s} value={s}>{SPORT_LABELS[s] || s}</option>)}
+              {SPORTS.map(s => <option key={s.type} value={s.type}>{s.label}</option>)}
             </select>
             <select
               value={voivodeship}
@@ -151,55 +101,32 @@ function Kalendarz() {
               <option value="">Wszystkie województwa</option>
               {VOIVODESHIPS.map(v => <option key={v} value={v}>{v}</option>)}
             </select>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={e => setDateFrom(e.target.value)}
-              className="input-field dark"
-              style={{ minWidth: 140 }}
-              placeholder="Od"
-            />
-            <input
-              type="date"
-              value={dateTo}
-              onChange={e => setDateTo(e.target.value)}
-              className="input-field dark"
-              style={{ minWidth: 140 }}
-              placeholder="Do"
-            />
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="input-field dark" style={{ minWidth: 140 }} />
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="input-field dark" style={{ minWidth: 140 }} />
             <button type="submit" className="btn-primary">Szukaj →</button>
           </form>
 
           {/* Sport pills */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+          <div className="sport-pills">
             <button
+              className={`sport-pill ${!sportType ? 'active' : ''}`}
+              style={!sportType ? { background: 'var(--orange)', border: 'none', color: 'white' } : {}}
               onClick={() => setSportType('')}
-              style={{
-                padding: '6px 14px', borderRadius: 100, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                background: !sportType ? 'var(--orange)' : 'rgba(255,255,255,0.07)',
-                border: !sportType ? 'none' : '1px solid rgba(255,255,255,0.12)',
-                color: !sportType ? 'white' : 'rgba(255,255,255,0.6)',
-              }}
             >
               Wszystkie
             </button>
             {SPORTS.map(s => {
-              const color = getSportColor(s);
-              const active = sportType === s;
+              const color = getSportColor(s.type);
+              const active = sportType === s.type;
               return (
                 <button
-                  key={s}
-                  onClick={() => setSportType(active ? '' : s)}
-                  style={{
-                    padding: '6px 14px', borderRadius: 100, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                    background: active ? color : 'rgba(255,255,255,0.07)',
-                    border: active ? 'none' : '1px solid rgba(255,255,255,0.12)',
-                    color: active ? 'white' : 'rgba(255,255,255,0.6)',
-                    display: 'flex', alignItems: 'center', gap: 6,
-                  }}
+                  key={s.type}
+                  className={`sport-pill ${active ? 'active' : ''}`}
+                  style={active ? { background: color } : {}}
+                  onClick={() => setSportType(active ? '' : s.type)}
                 >
-                  <SportIcon type={s} size={12} color={active ? 'white' : color} />
-                  {SPORT_LABELS[s]}
+                  <SportIcon type={s.type} size={12} color={active ? 'white' : color} />
+                  {s.label}
                 </button>
               );
             })}
@@ -215,20 +142,19 @@ function Kalendarz() {
           </p>
 
           {loading && events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <div className="center-content">
               <div className="loading-spinner" />
             </div>
           ) : events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--gray)' }}>
+            <div className="empty-state">
               <p style={{ fontSize: 18, marginBottom: 12 }}>Brak wyników dla podanych filtrów</p>
-              <button onClick={() => { setSportType(''); setVoivodeship(''); setSearch(''); fetchEvents(1); }}
-                className="btn-outline">
+              <button onClick={clearFilters} className="btn-outline">
                 Wyczyść filtry
               </button>
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+              <div className="event-grid">
                 {events.map(ev => <EventCard key={ev.id} event={ev} />)}
               </div>
 

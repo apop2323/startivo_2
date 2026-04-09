@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useReveal } from '../hooks/useReveal';
+import CheckIcon from '../components/CheckIcon';
 
 const PACKAGES = [
   {
@@ -77,15 +78,15 @@ function Wspolpraca() {
       {/* Stats */}
       <div style={{ background: '#0A0A0A', padding: '40px 0', borderBottom: '1px solid var(--dark-border)' }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, textAlign: 'center' }}>
+          <div className="stats-grid">
             {[
               { val: '74K+', label: 'Użytkowników' },
               { val: '150+', label: 'Wydarzeń rocznie' },
               { val: '16', label: 'Województw' },
               { val: '12K+', label: 'Subskrybentów' },
             ].map((s, i) => (
-              <div key={i}>
-                <div style={{ fontFamily: "'Funnel Display', sans-serif", fontWeight: 800, fontSize: 'clamp(28px, 4vw, 48px)', color: '#FF5C00', letterSpacing: '-0.04em' }}>{s.val}</div>
+              <div key={i} className="stats-item" style={{ borderColor: 'var(--dark-border)' }}>
+                <div className="stats-value" style={{ color: '#FF5C00' }}>{s.val}</div>
                 <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 4 }}>{s.label}</div>
               </div>
             ))}
@@ -100,37 +101,24 @@ function Wspolpraca() {
             <span className="section-label" style={{ justifyContent: 'center', display: 'flex' }}>Pakiety</span>
             <h2>Wybierz odpowiedni plan</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div className="packages-grid">
             {PACKAGES.map((pkg, i) => (
               <div
                 key={i}
-                className={`reveal d${i + 1}`}
-                style={{
-                  background: 'white', borderRadius: 'var(--r-xl)', padding: 32,
-                  border: pkg.highlight ? '2px solid var(--orange)' : '1px solid var(--cream-border)',
-                  position: 'relative',
-                }}
+                className={`reveal d${i + 1} package-card ${pkg.highlight ? 'highlight' : ''}`}
               >
                 {pkg.highlight && (
-                  <span style={{
-                    position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-                    background: 'var(--orange)', color: 'white', fontSize: 11, fontWeight: 700,
-                    padding: '4px 12px', borderRadius: 100, whiteSpace: 'nowrap',
-                  }}>
-                    Najbardziej popularny
-                  </span>
+                  <span className="package-popular-tag">Najbardziej popularny</span>
                 )}
                 <h3 style={{ marginBottom: 8 }}>{pkg.name}</h3>
-                <div style={{ fontFamily: "'Funnel Display', sans-serif", fontWeight: 800, fontSize: 28, marginBottom: 8, color: pkg.highlight ? 'var(--orange)' : 'var(--black)' }}>
+                <div className="package-price" style={{ color: pkg.highlight ? 'var(--orange)' : 'var(--black)' }}>
                   {pkg.price}
                 </div>
                 <p style={{ color: 'var(--gray)', fontSize: 14, marginBottom: 24 }}>{pkg.desc}</p>
-                <ul style={{ listStyle: 'none', marginBottom: 28 }}>
+                <ul className="package-features">
                   {pkg.features.map((f, j) => (
-                    <li key={j} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, fontSize: 14 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={pkg.highlight ? 'var(--orange)' : '#666'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
+                    <li key={j} className="package-feature">
+                      <CheckIcon color={pkg.highlight ? 'var(--orange)' : '#666'} />
                       {f}
                     </li>
                   ))}
@@ -157,8 +145,8 @@ function Wspolpraca() {
           </div>
 
           {done ? (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+            <div className="center-content" style={{ padding: '40px 0' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>{'\u2705'}</div>
               <h3 style={{ color: 'white', marginBottom: 8 }}>Wiadomość wysłana!</h3>
               <p style={{ color: 'rgba(255,255,255,0.5)' }}>Skontaktujemy się z Tobą wkrótce.</p>
             </div>
@@ -166,20 +154,20 @@ function Wspolpraca() {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 6 }}>Imię i nazwisko *</label>
+                  <label className="form-label form-label-dark">Imię i nazwisko *</label>
                   <input className="input-field dark" value={form.name} onChange={e => set('name', e.target.value)} required placeholder="Jan Kowalski" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 6 }}>Firma / organizacja</label>
+                  <label className="form-label form-label-dark">Firma / organizacja</label>
                   <input className="input-field dark" value={form.company} onChange={e => set('company', e.target.value)} placeholder="Nazwa firmy" />
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 6 }}>Email *</label>
+                <label className="form-label form-label-dark">Email *</label>
                 <input type="email" className="input-field dark" value={form.email} onChange={e => set('email', e.target.value)} required placeholder="kontakt@firma.pl" />
               </div>
               <div>
-                <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 6 }}>Temat zapytania</label>
+                <label className="form-label form-label-dark">Temat zapytania</label>
                 <select className="input-field dark" value={form.inquiry_type} onChange={e => set('inquiry_type', e.target.value)}>
                   <option value="premium">Pakiet Premium</option>
                   <option value="partnership">Partnerstwo</option>
@@ -188,7 +176,7 @@ function Wspolpraca() {
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 6 }}>Wiadomość *</label>
+                <label className="form-label form-label-dark">Wiadomość *</label>
                 <textarea
                   className="input-field dark"
                   value={form.message}

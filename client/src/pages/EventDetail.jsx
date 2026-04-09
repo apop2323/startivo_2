@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
+import { formatDateLongPL, formatDatePL, toggleSavedEvent, isEventSaved } from '../utils';
+import { MY_EVENTS_STORAGE_KEY } from '../constants';
 
 function EventDetail() {
   const { slug } = useParams();
@@ -10,6 +12,7 @@ function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [alertEmail, setAlertEmail] = useState('');
   const [alertDone, setAlertDone] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -20,6 +23,7 @@ function EventDetail() {
       })
       .then(d => {
         setEvent(d);
+        setSaved(isEventSaved(d.id, MY_EVENTS_STORAGE_KEY));
         setLoading(false);
         fetch(`/api/events/${d.id}/view`, { method: 'POST' }).catch(() => {});
       })
@@ -35,20 +39,24 @@ function EventDetail() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: alertEmail })
       });
-      setAlertDone(true);
-    } catch {
-      setAlertDone(true);
-    }
+    } catch {}
+    setAlertDone(true);
+  };
+
+  const handleToggleSave = () => {
+    if (!event) return;
+    toggleSavedEvent(event.id, MY_EVENTS_STORAGE_KEY);
+    setSaved(s => !s);
   };
 
   if (loading) return (
-    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="center-content">
       <div className="loading-spinner" />
     </div>
   );
 
   if (!event) return (
-    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, padding: 40 }}>
+    <div className="center-content">
       <h2>Wydarzenie nie znalezione</h2>
       <p style={{ color: 'var(--gray)' }}>Mogło zostać usunięte lub adres URL jest nieprawidłowy.</p>
       <button className="btn-primary" onClick={() => navigate('/kalendarz')}>← Wróć do kalendarza</button>
@@ -56,9 +64,7 @@ function EventDetail() {
   );
 
   const color = getSportColor(event.sport_type);
-  const dateStr = event.date_start
-    ? new Date(event.date_start).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-    : '';
+  const dateStr = formatDateLongPL(event.date_start);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -84,6 +90,15 @@ function EventDetail() {
     } : undefined
   };
 
+  const infoItems = [
+    { icon: '\u{1F4C5}', label: 'Data', value: dateStr },
+    { icon: '\u{1F4CD}', label: 'Miasto', value: `${event.city}, ${event.voivodeship}` },
+    event.distance && { icon: '\u{1F4CF}', label: 'Dystans', value: event.distance },
+    event.price !== null && { icon: '\u{1F4B0}', label: 'Cena', value: event.price ? `${event.price} zł` : 'Bezpłatne' },
+    event.max_participants && { icon: '\u{1F465}', label: 'Max uczestników', value: event.max_participants },
+    event.registration_deadline && { icon: '\u{23F0}', label: 'Zapisy do', value: formatDatePL(event.registration_deadline) },
+  ].filter(Boolean);
+
   return (
     <>
       <Helmet>
@@ -93,30 +108,21 @@ function EventDetail() {
       </Helmet>
 
       {/* Hero */}
-      <div style={{
-        minHeight: 400, background: `linear-gradient(135deg, ${color}22 0%, #0D0D0D 60%)`,
-        display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-        padding: '120px 0 60px',
-      }}>
+      <div className="event-detail-hero" style={{ background: `linear-gradient(135deg, ${color}22 0%, #0D0D0D 60%)` }}>
         <div className="container">
-          <button
-            onClick={() => navigate(-1)}
-            style={{ color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 24, fontSize: 14 }}
-          >
-            ← Wróć
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <button className="back-btn" onClick={() => navigate(-1)}>← Wróć</button>
+          <div className="event-detail-badges">
             <span className="sport-badge" style={{ background: `${color}22`, color, fontSize: 13 }}>
               <SportIcon type={event.sport_type} size={14} />
               {getSportLabel(event.sport_type)}
             </span>
             {event.difficulty && (
-              <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 100, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
+              <span className="event-detail-tag" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
                 {event.difficulty}
               </span>
             )}
             {event.featured && (
-              <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 100, background: 'rgba(255,92,0,0.2)', color: '#FF5C00', fontWeight: 600 }}>
+              <span className="event-detail-tag" style={{ background: 'rgba(255,92,0,0.2)', color: '#FF5C00' }}>
                 ★ Polecane
               </span>
             )}
@@ -126,48 +132,30 @@ function EventDetail() {
       </div>
 
       {/* Content */}
-      <div style={{ background: 'var(--cream)', padding: '60px 0 100px' }}>
+      <div className="event-detail-content">
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 40, alignItems: 'start' }}>
+          <div className="event-detail-layout">
             {/* Main */}
             <div>
-              {/* Key info row */}
-              <div style={{
-                display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                gap: 16, marginBottom: 40,
-              }}>
-                {[
-                  { icon: '📅', label: 'Data', value: dateStr },
-                  { icon: '📍', label: 'Miasto', value: `${event.city}, ${event.voivodeship}` },
-                  event.distance && { icon: '📏', label: 'Dystans', value: event.distance },
-                  event.price !== null && { icon: '💰', label: 'Cena', value: event.price ? `${event.price} zł` : 'Bezpłatne' },
-                  event.max_participants && { icon: '👥', label: 'Max uczestników', value: event.max_participants },
-                  event.registration_deadline && { icon: '⏰', label: 'Zapisy do', value: new Date(event.registration_deadline).toLocaleDateString('pl-PL') },
-                ].filter(Boolean).map((item, i) => (
-                  <div key={i} style={{
-                    background: 'white', borderRadius: 'var(--r-lg)', padding: '16px 20px',
-                    border: '1px solid var(--cream-border)',
-                  }}>
-                    <div style={{ fontSize: 20, marginBottom: 4 }}>{item.icon}</div>
-                    <div style={{ fontSize: 11, color: 'var(--gray)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.label}</div>
-                    <div style={{ fontWeight: 600, fontSize: 15, marginTop: 2 }}>{item.value}</div>
+              <div className="event-info-grid">
+                {infoItems.map((item, i) => (
+                  <div key={i} className="event-info-card">
+                    <div className="event-info-icon">{item.icon}</div>
+                    <div className="event-info-label">{item.label}</div>
+                    <div className="event-info-value">{item.value}</div>
                   </div>
                 ))}
               </div>
 
-              {/* Description */}
               {event.description && (
-                <div style={{ background: 'white', borderRadius: 'var(--r-xl)', padding: 32, border: '1px solid var(--cream-border)', marginBottom: 24 }}>
+                <div className="event-section-card">
                   <h3 style={{ marginBottom: 16 }}>O zawodach</h3>
-                  <div style={{ color: '#333', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-                    {event.description}
-                  </div>
+                  <div className="event-description">{event.description}</div>
                 </div>
               )}
 
-              {/* Organizer */}
               {event.organizer_name && (
-                <div style={{ background: 'white', borderRadius: 'var(--r-xl)', padding: 24, border: '1px solid var(--cream-border)' }}>
+                <div className="event-section-card" style={{ padding: 24 }}>
                   <h3 style={{ marginBottom: 12, fontSize: 18 }}>Organizator</h3>
                   <p style={{ fontWeight: 600 }}>{event.organizer_name}</p>
                   {event.organizer_email && (
@@ -175,7 +163,7 @@ function EventDetail() {
                   )}
                   {event.event_website && (
                     <a href={event.event_website} target="_blank" rel="noopener noreferrer"
-                      style={{ color: 'var(--orange)', fontSize: 14, fontWeight: 600, display: 'block', marginTop: 8 }}>
+                      className="section-link" style={{ display: 'block', marginTop: 8, fontSize: 14 }}>
                       Strona wydarzenia →
                     </a>
                   )}
@@ -184,19 +172,15 @@ function EventDetail() {
             </div>
 
             {/* Sidebar */}
-            <div style={{ position: 'sticky', top: 100 }}>
+            <div className="event-sidebar">
               {/* CTA card */}
-              <div style={{
-                background: 'white', borderRadius: 'var(--r-xl)', padding: 28,
-                border: '1px solid var(--cream-border)',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.06)', marginBottom: 16,
-              }}>
-                <div style={{ fontSize: 28, fontWeight: 800, fontFamily: "'Funnel Display', sans-serif", marginBottom: 4 }}>
+              <div className="event-sidebar-card">
+                <div className="event-sidebar-price">
                   {event.price ? `${event.price} zł` : 'Bezpłatne'}
                 </div>
-                <div style={{ color: 'var(--gray)', fontSize: 13, marginBottom: 20 }}>
+                <div className="event-sidebar-deadline">
                   {event.registration_deadline
-                    ? `Zapisy do ${new Date(event.registration_deadline).toLocaleDateString('pl-PL')}`
+                    ? `Zapisy do ${formatDatePL(event.registration_deadline)}`
                     : 'Sprawdź dostępność'}
                 </div>
                 {event.registration_url ? (
@@ -216,17 +200,25 @@ function EventDetail() {
                 )}
               </div>
 
+              {/* Save button */}
+              <button
+                className={`save-btn ${saved ? 'saved' : ''}`}
+                onClick={handleToggleSave}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                </svg>
+                {saved ? 'Zapisano w Moich startach' : 'Zapisz w Moich startach'}
+              </button>
+
               {/* Alert form */}
-              <div style={{
-                background: 'white', borderRadius: 'var(--r-xl)', padding: 24,
-                border: '1px solid var(--cream-border)',
-              }}>
+              <div className="event-reminder-card">
                 <h3 style={{ fontSize: 16, marginBottom: 8 }}>Przypomnij mi</h3>
                 <p style={{ color: 'var(--gray)', fontSize: 13, marginBottom: 16 }}>
                   Wyślemy Ci przypomnienie 7 dni przed startem.
                 </p>
                 {alertDone ? (
-                  <p style={{ color: 'var(--orange)', fontWeight: 600, fontSize: 14 }}>Ustawiono przypomnienie!</p>
+                  <p className="alert-success">Ustawiono przypomnienie!</p>
                 ) : (
                   <form onSubmit={handleAlert} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <input

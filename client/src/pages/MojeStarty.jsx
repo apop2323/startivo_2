@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import SportIcon, { getSportColor, getSportLabel } from '../components/SportIcon';
-
-const STORAGE_KEY = 'startivo_my_events';
+import SportIcon, { getSportColor } from '../components/SportIcon';
+import { formatDatePL } from '../utils';
+import { MY_EVENTS_STORAGE_KEY } from '../constants';
 
 function MojeStarty() {
   const navigate = useNavigate();
@@ -12,12 +12,12 @@ function MojeStarty() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const ids = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const ids = JSON.parse(localStorage.getItem(MY_EVENTS_STORAGE_KEY) || '[]');
     setSaved(ids);
 
     if (ids.length > 0) {
       setLoading(true);
-      fetch(`/api/events?limit=100`)
+      fetch('/api/events?limit=100')
         .then(r => r.json())
         .then(d => {
           const all = d.events || [];
@@ -32,7 +32,7 @@ function MojeStarty() {
     const updated = saved.filter(s => s !== id);
     setSaved(updated);
     setEvents(ev => ev.filter(e => e.id !== id));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem(MY_EVENTS_STORAGE_KEY, JSON.stringify(updated));
   };
 
   return (
@@ -52,14 +52,14 @@ function MojeStarty() {
       <div style={{ background: 'var(--cream)', padding: '60px 0 100px', minHeight: '50vh' }}>
         <div className="container">
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div className="center-content">
               <div className="loading-spinner" />
             </div>
           ) : events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <div style={{ fontSize: 64, marginBottom: 20 }}>🏅</div>
+            <div className="empty-state">
+              <div className="empty-state-icon">{'\u{1F3C5}'}</div>
               <h2 style={{ marginBottom: 12 }}>Brak zapisanych startów</h2>
-              <p style={{ color: 'var(--gray)', maxWidth: 400, margin: '0 auto 32px' }}>
+              <p>
                 Przeglądaj kalendarz i zapisuj interesujące Cię zawody — znajdziesz je tutaj.
               </p>
               <button className="btn-primary" onClick={() => navigate('/kalendarz')}>
@@ -75,25 +75,14 @@ function MojeStarty() {
                 {events.map(ev => {
                   const color = getSportColor(ev.sport_type);
                   return (
-                    <div
-                      key={ev.id}
-                      style={{
-                        background: 'white', borderRadius: 'var(--r-xl)', padding: '20px 24px',
-                        border: '1px solid var(--cream-border)',
-                        display: 'grid', gridTemplateColumns: '56px 1fr auto auto', gap: 16, alignItems: 'center',
-                      }}
-                    >
-                      <div style={{
-                        width: 56, height: 56, borderRadius: 12,
-                        background: `linear-gradient(135deg, ${color}33, ${color}11)`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
+                    <div key={ev.id} className="my-starts-item">
+                      <div className="upcoming-icon" style={{ background: `linear-gradient(135deg, ${color}33, ${color}11)` }}>
                         <SportIcon type={ev.sport_type} size={24} />
                       </div>
                       <div>
                         <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{ev.name}</div>
                         <div style={{ color: 'var(--gray)', fontSize: 13 }}>
-                          {ev.city} · {new Date(ev.date_start).toLocaleDateString('pl-PL')}
+                          {ev.city} · {formatDatePL(ev.date_start)}
                           {ev.price ? ` · ${ev.price} zł` : ''}
                         </div>
                       </div>
@@ -105,9 +94,10 @@ function MojeStarty() {
                         Zobacz
                       </button>
                       <button
-                        style={{ color: '#ccc', fontSize: 20, background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+                        className="my-starts-remove"
                         onClick={() => remove(ev.id)}
                         title="Usuń z listy"
+                        aria-label="Usuń z listy"
                       >
                         ✕
                       </button>

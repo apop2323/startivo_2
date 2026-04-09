@@ -2,33 +2,18 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
+import { SPORTS, VOIVODESHIPS, DIFFICULTIES } from '../constants';
 
-const SPORTS = [
-  { value: 'running', label: 'Bieganie' }, { value: 'hyrox', label: 'Hyrox' },
-  { value: 'ocr', label: 'OCR / Przeszkodówka' }, { value: 'triathlon', label: 'Triathlon' },
-  { value: 'cycling', label: 'Kolarstwo' }, { value: 'trail', label: 'Trail Running' },
-  { value: 'other', label: 'Inne' },
-];
-
-const VOIVODESHIPS = [
-  'dolnośląskie','kujawsko-pomorskie','lubelskie','lubuskie','łódzkie',
-  'małopolskie','mazowieckie','opolskie','podkarpackie','podlaskie',
-  'pomorskie','śląskie','świętokrzyskie','warmińsko-mazurskie','wielkopolskie','zachodniopomorskie'
-];
-
-const DIFFICULTIES = [
-  { value: 'easy', label: 'Łatwy' }, { value: 'medium', label: 'Średni' },
-  { value: 'hard', label: 'Trudny' }, { value: 'extreme', label: 'Ekstremalny' },
-];
+const INITIAL_FORM = {
+  name: '', sport_type: '', date_start: '', date_end: '', city: '', voivodeship: '',
+  description: '', distance: '', difficulty: '', price: '', registration_url: '',
+  registration_deadline: '', organizer_name: '', organizer_email: '', event_website: '',
+};
 
 function DodajEvent() {
   useReveal();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: '', sport_type: '', date_start: '', date_end: '', city: '', voivodeship: '',
-    description: '', distance: '', difficulty: '', price: '', registration_url: '',
-    registration_deadline: '', organizer_name: '', organizer_email: '', event_website: '',
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -60,23 +45,21 @@ function DodajEvent() {
 
   if (success) {
     return (
-      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+      <div className="center-content" style={{ minHeight: '60vh' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>{'\u2705'}</div>
         <h2>Wydarzenie zgłoszone!</h2>
         <p style={{ color: 'var(--gray)', marginTop: 12, maxWidth: 480 }}>
           Twoje wydarzenie zostało przesłane do moderacji. Nasz zespół sprawdzi je i opublikuje w ciągu 24 godzin.
         </p>
         <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
           <button className="btn-primary" onClick={() => navigate('/kalendarz')}>Zobacz kalendarz</button>
-          <button className="btn-outline" onClick={() => { setSuccess(false); setForm({ name:'',sport_type:'',date_start:'',date_end:'',city:'',voivodeship:'',description:'',distance:'',difficulty:'',price:'',registration_url:'',registration_deadline:'',organizer_name:'',organizer_email:'',event_website:'' }); }}>
+          <button className="btn-outline" onClick={() => { setSuccess(false); setForm(INITIAL_FORM); }}>
             Dodaj kolejne
           </button>
         </div>
       </div>
     );
   }
-
-  const inputStyle = { marginBottom: 0 };
 
   return (
     <>
@@ -100,23 +83,23 @@ function DodajEvent() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
             {/* Basic info */}
-            <div style={{ background: 'white', borderRadius: 'var(--r-xl)', padding: 32, border: '1px solid var(--cream-border)' }}>
+            <div className="event-section-card">
               <h3 style={{ marginBottom: 24, fontSize: 18 }}>Podstawowe informacje</h3>
               <div style={{ display: 'grid', gap: 16 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Nazwa wydarzenia *</label>
+                  <label className="form-label">Nazwa wydarzenia *</label>
                   <input className="input-field" value={form.name} onChange={e => set('name', e.target.value)} required placeholder="np. Runmageddon Warszawa 2026" />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Dyscyplina *</label>
+                    <label className="form-label">Dyscyplina *</label>
                     <select className="input-field" value={form.sport_type} onChange={e => set('sport_type', e.target.value)} required>
                       <option value="">Wybierz...</option>
-                      {SPORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                      {SPORTS.map(s => <option key={s.type} value={s.type}>{s.label}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Poziom trudności</label>
+                    <label className="form-label">Poziom trudności</label>
                     <select className="input-field" value={form.difficulty} onChange={e => set('difficulty', e.target.value)}>
                       <option value="">Wybierz...</option>
                       {DIFFICULTIES.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
@@ -125,21 +108,21 @@ function DodajEvent() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Data rozpoczęcia *</label>
+                    <label className="form-label">Data rozpoczęcia *</label>
                     <input type="date" className="input-field" value={form.date_start} onChange={e => set('date_start', e.target.value)} required />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Data zakończenia</label>
+                    <label className="form-label">Data zakończenia</label>
                     <input type="date" className="input-field" value={form.date_end} onChange={e => set('date_end', e.target.value)} />
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Miasto *</label>
+                    <label className="form-label">Miasto *</label>
                     <input className="input-field" value={form.city} onChange={e => set('city', e.target.value)} required placeholder="np. Warszawa" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Województwo *</label>
+                    <label className="form-label">Województwo *</label>
                     <select className="input-field" value={form.voivodeship} onChange={e => set('voivodeship', e.target.value)} required>
                       <option value="">Wybierz...</option>
                       {VOIVODESHIPS.map(v => <option key={v} value={v}>{v}</option>)}
@@ -148,16 +131,16 @@ function DodajEvent() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Dystans</label>
+                    <label className="form-label">Dystans</label>
                     <input className="input-field" value={form.distance} onChange={e => set('distance', e.target.value)} placeholder="np. 5km / 10km / 21km" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Cena (zł)</label>
+                    <label className="form-label">Cena (zł)</label>
                     <input type="number" className="input-field" value={form.price} onChange={e => set('price', e.target.value)} placeholder="np. 150" min="0" />
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Opis</label>
+                  <label className="form-label">Opis</label>
                   <textarea
                     className="input-field"
                     value={form.description}
@@ -170,44 +153,40 @@ function DodajEvent() {
             </div>
 
             {/* Registration */}
-            <div style={{ background: 'white', borderRadius: 'var(--r-xl)', padding: 32, border: '1px solid var(--cream-border)' }}>
+            <div className="event-section-card">
               <h3 style={{ marginBottom: 24, fontSize: 18 }}>Zapisy i rejestracja</h3>
               <div style={{ display: 'grid', gap: 16 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Link do zapisów</label>
+                  <label className="form-label">Link do zapisów</label>
                   <input type="url" className="input-field" value={form.registration_url} onChange={e => set('registration_url', e.target.value)} placeholder="https://..." />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Termin zapisów</label>
+                  <label className="form-label">Termin zapisów</label>
                   <input type="date" className="input-field" value={form.registration_deadline} onChange={e => set('registration_deadline', e.target.value)} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Strona wydarzenia</label>
+                  <label className="form-label">Strona wydarzenia</label>
                   <input type="url" className="input-field" value={form.event_website} onChange={e => set('event_website', e.target.value)} placeholder="https://..." />
                 </div>
               </div>
             </div>
 
             {/* Organizer */}
-            <div style={{ background: 'white', borderRadius: 'var(--r-xl)', padding: 32, border: '1px solid var(--cream-border)' }}>
+            <div className="event-section-card">
               <h3 style={{ marginBottom: 24, fontSize: 18 }}>Dane organizatora</h3>
               <div style={{ display: 'grid', gap: 16 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Nazwa organizatora</label>
+                  <label className="form-label">Nazwa organizatora</label>
                   <input className="input-field" value={form.organizer_name} onChange={e => set('organizer_name', e.target.value)} placeholder="np. Stowarzyszenie Sportowe XYZ" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Email kontaktowy</label>
+                  <label className="form-label">Email kontaktowy</label>
                   <input type="email" className="input-field" value={form.organizer_email} onChange={e => set('organizer_email', e.target.value)} placeholder="kontakt@twojafirma.pl" />
                 </div>
               </div>
             </div>
 
-            {error && (
-              <div style={{ background: '#fff3f3', border: '1px solid #ffcccc', color: '#cc0000', padding: '12px 16px', borderRadius: 'var(--r-md)', fontSize: 14 }}>
-                {error}
-              </div>
-            )}
+            {error && <div className="alert-error">{error}</div>}
 
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button type="button" className="btn-outline" onClick={() => navigate('/')}>Anuluj</button>

@@ -1,24 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import HexLogo from './HexLogo';
+import CheckIcon from './CheckIcon';
+import { getSportColor } from './SportIcon';
+import { SPORTS } from '../constants';
 
-const SPORTS = [
-  { type: 'running', label: 'Bieganie', color: '#4A90E2' },
-  { type: 'hyrox', label: 'Hyrox', color: '#FF5C00' },
-  { type: 'ocr', label: 'OCR', color: '#E25C5C' },
-  { type: 'triathlon', label: 'Triathlon', color: '#26C6DA' },
-  { type: 'cycling', label: 'Kolarstwo', color: '#4CAF50' },
-  { type: 'trail', label: 'Trail Running', color: '#AB47BC' },
-];
-
-function HexLogo() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-      <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" fill="#FF5C00"/>
-      <path d="M11 16L14 11L17 16L14 21L11 16Z" fill="white"/>
-      <path d="M17 13L21 16L17 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>
-  );
-}
+const SPORTS_WITH_COLORS = SPORTS.filter(s => s.type !== 'other');
 
 function Footer() {
   const [email, setEmail] = useState('');
@@ -54,9 +41,7 @@ function Footer() {
                 Newsletter ze startami, zapiskami i poradnikami — bez spamu.
               </p>
               {submitted ? (
-                <p style={{ color: '#FF5C00', marginTop: 16, fontWeight: 600 }}>
-                  Zapisano! Dziękujemy.
-                </p>
+                <p className="alert-success" style={{ marginTop: 16 }}>Zapisano! Dziękujemy.</p>
               ) : (
                 <form className="footer-newsletter-form" onSubmit={handleSubmit}>
                   <input
@@ -77,9 +62,7 @@ function Footer() {
                 'Wyprzedź terminy zapisów'
               ].map((b, i) => (
                 <div className="footer-benefit" key={i}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
+                  <CheckIcon />
                   {b}
                 </div>
               ))}
@@ -94,7 +77,7 @@ function Footer() {
           {/* Col 1: Brand */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <HexLogo />
+              <HexLogo size={28} />
               <span style={{ fontFamily: "'Funnel Display', sans-serif", fontWeight: 800, color: 'white', fontSize: 18 }}>
                 Startivo
               </span>
@@ -140,17 +123,20 @@ function Footer() {
           <div>
             <p className="footer-col-title">Dyscypliny</p>
             <ul className="footer-col-links">
-              {SPORTS.map(s => (
-                <li key={s.type}>
-                  <Link to={`/kalendarz?sport_type=${s.type}`}>
-                    <span
-                      className="footer-sport-dot"
-                      style={{ backgroundColor: s.color, color: s.color }}
-                    />
-                    {s.label}
-                  </Link>
-                </li>
-              ))}
+              {SPORTS_WITH_COLORS.map(s => {
+                const color = getSportColor(s.type);
+                return (
+                  <li key={s.type}>
+                    <Link to={`/kalendarz?sport_type=${s.type}`}>
+                      <span
+                        className="footer-sport-dot"
+                        style={{ backgroundColor: color, color }}
+                      />
+                      {s.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
@@ -170,7 +156,6 @@ function Footer() {
             <ul className="footer-col-links">
               <li><Link to="/wspolpraca">O Startivo</Link></li>
               <li><Link to="/polityka-prywatnosci">Polityka prywatności</Link></li>
-              <li><a href="#regulamin">Regulamin</a></li>
               <li><Link to="/wspolpraca">Kontakt</Link></li>
             </ul>
           </div>
@@ -178,7 +163,7 @@ function Footer() {
 
         <div className="footer-bottom">
           <span>© 2026 Startivo.pl — Wszelkie prawa zastrzeżone</span>
-          <span>Made for active Poland 🇵🇱</span>
+          <span>Made for active Poland</span>
         </div>
       </div>
     </footer>
